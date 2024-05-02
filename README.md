@@ -11,12 +11,31 @@
 
 yaml 파일의 형태는 다음과 같습니다.
 
-```influx.yaml
+```influx yaml
 
 default:
  settings: 
-  token : "12345"
-  url : "localhost:8086"
-  org : "org"
+  token: "12345"
+  url: "localhost:8086"
+  org: "org"
 
+ output:
+  token: "token"
+  url: "localhost:8086"
+  org: "org"  
+
+```
+
+```config yaml
+default:
+ settings:
+  bucket: "bucket"
+  factory: "factory"
+  domain: "domain"
+  gateway: "gateway"
+  measurement: "measurement"
+  channel:
+   - "channel1"
+   - "channel2"
+  field: "field"
 ```
