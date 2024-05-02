@@ -7,11 +7,11 @@
 추후 추가 및 변동될 여지 또한 존재합니다.
 
 - influx.yaml: token, url, org를 필요로 합니다.
-- config.yaml: bucket, domain, company, sector, motor, sensors를 필요로 합니다. sensor는 list입니다.
+- config.yaml: bucket, factory, domain, gateway, measurement, channel, field를 필요로 합니다. channel는 list item입니다.
 
 yaml 파일의 형태는 다음과 같습니다.
 
-```yaml
+```influx.yaml
 
 default:
  settings: 
