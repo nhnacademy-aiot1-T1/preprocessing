@@ -11,7 +11,8 @@
 
 yaml 파일의 형태는 다음과 같습니다.
 
-```influx yaml
+influx:
+```yaml
 
 default:
  settings: 
@@ -26,7 +27,8 @@ default:
 
 ```
 
-```config yaml
+config:
+```yaml
 default:
  settings:
   bucket: "bucket"
