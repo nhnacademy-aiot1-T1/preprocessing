@@ -14,8 +14,6 @@ if (file.exists(config_file)) {
   config <- config::get(file = config_file)
 
   bucket <- config$settings$bucket
-  factory <- config$settings$factory
-  domain <- config$settings$domain
   gateway <- config$settings$gateway
   measurement <- config$settings$measurement
   channels <- config$settings$channel
@@ -23,8 +21,6 @@ if (file.exists(config_file)) {
   
 } else {
   bucket <- "data"
-  factory <- "factory"
-  domain <- "aiotone"
   gateway <- "gateway1"
   measurement <- "measurement"
   channels <-c("DemoDevice")
@@ -60,11 +56,11 @@ df_result <- data.frame()
 for (channel in channels) {
 
   fluxQuery <- sprintf(
-    'from(bucket: "%s") |> range(start: -5m) |> filter(fn: (r) => r._measurement == "%s") |> filter(fn: (r) => r.channel == "%s") |> filter(fn: (r) => r.domain == "%s") |> filter(fn: (r) => r._field == "%s")', 
-    bucket, measurement, channel, domain, field)
+    'from(bucket: "%s") |> range(start: -3m) |> filter(fn: (r) => r._measurement == "%s") |> filter(fn: (r) => r.channel == "%s") |> filter(fn: (r) => r._field == "%s")', 
+    bucket, measurement, channel, field)
   
   data <- client$query(fluxQuery)
-  
+  cat("client에 query 완료.\n")  
   if (!is.null(data)) {
     
       data_df <- data.frame(data) ## 들어오는 데이터를 data frame으로 변환.
@@ -75,13 +71,13 @@ for (channel in channels) {
       result_df <- data.frame(
         time = data_df$time,
         value = normalized_data,
-        domain = data_df$domain,
         channel = data_df$channel,
-        factory = data_df$factory,
         gateway = data_df$gateway,
         measurement = data_df$X_measurement
       )
       
-      output_client$write(result_df, bucket = "preprocessing", precision = "ms", measurementCol = "measurement", tagCols = c("domain", "channel","factory", "gateway"), fieldCols = c("normalized_data"), timeCol = "time")
+      output_client$write(result_df, bucket = "ai", precision = "ms", measurementCol = "measurement", tagCols = c("channel", "gateway"), fieldCols = c("value"), timeCol = "time")
+      cat("output_client query 완료.\n")
   }
+cat("channel is: ", channel)
 }
