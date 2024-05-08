@@ -37,5 +37,17 @@ default:
   channel:
    - "channel1"
    - "channel2"
+  motor:
+   - "DemoMotor1"
+   - "DemoMotor2"
   field: "field"
+```
+
+위의 경우, influx는 위와 같습니다.
+```influx
+bucket = ai
+시간 복잡도 = ms
+mesaurement = measurement
+tag = gateway, motor, channel
+field = value
 ```
