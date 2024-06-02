@@ -1,9 +1,10 @@
 # Preprocessing api
 
-전처리를 담당하는 repository입니다.
-스케줄링을 사용하여 일정 시간마다 influxdb에서 데이터를 가져와, 전처리를 하고 influxdb에 값을 저장합니다.
++ 전처리를 담당하는 repository입니다.
+ + 스케줄링을 사용하여 일정 시간마다 influxdb에서 데이터를 가져와, 전처리를 하고 influxdb에 값을 저장합니다.
 
-influxClient를 사용하였습니다.
++ influxClient를 사용하였습니다.
++ 담당자 : <a href="https://github.com/chanhwiim">임찬휘</a>
 
 
 ## 사용 기술
@@ -47,7 +48,3 @@ default:
   url: "localhost:8086"
   org: "org"
 ```
-
-
-## 담당자
-임찬휘
