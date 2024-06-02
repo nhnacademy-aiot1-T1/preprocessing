@@ -5,15 +5,18 @@
 
 influxClient를 사용하였습니다.
 
+
 ## 사용 기술
 전처리: R
 사용한 packages: config, influxdbclient
+
 
 ## 주요 기능
 - yml 파일을 읽어 setting을 합니다.
 - 어디에 연결할 것인지(config.yaml), 연결할 때 필요한 것(token, etc) (influx.yaml)를 필요로 합니다.
 - 데이터는 -Inf, Inf값에 대한 처리, 정규화, 결측치에 대한 처리를 합니다.
 - influxdb 관련 설정(config.yaml) 파일이 없을 경우, 동작하지 않습니다.
+
 
 ### config.yaml
 ```yaml
@@ -44,6 +47,7 @@ default:
   url: "localhost:8086"
   org: "org"
 ```
+
 
 ## 담당자
 임찬휘
