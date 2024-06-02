@@ -4,6 +4,9 @@ if (!requireNamespace("config", quietly = TRUE)) {
 if (!requireNamespace("influxdbclient", quietly = TRUE)) {
   install.packages("influxdbclient")
 }
+if (!requireNamespace("zoo", quietly = TRUE)) {
+  install.packages("zoo")
+}
 
 library(influxdbclient)
 
@@ -54,22 +57,69 @@ client <- InfluxDBClient$new(url = url, token = token, org = org)
 output_client <- InfluxDBClient$new(url = output_url, token = output_token, org = output_org)
 
 df_result <- data.frame()
+
+
+interpolate_na <- function(x) {
+
+  x[is.infinite(x)] <- NA
+  
+  na_index <- which(is.na(x))
+  if (length(na_index) > 0) {
+    for (i in na_index) {
+      if (i > 1 && i < length(x)) {
+        if (!is.na(x[i-1]) && !is.na(x[i+1])) {
+          x[i] <- (x[i-1] + x[i+1]) / 2
+        } else if (!is.na(x[i-1])) {
+          x[i] <- x[i-1]
+        } else if (!is.na(x[i+1])) {
+          x[i] <- x[i+1]
+        }
+      } else if (i == 1) {
+        x[i] <- x[i+1]
+      } else if (i == length(x)) {
+        x[i] <- x[i-1]
+      }
+    }
+  }
+  return(x)
+}
+
 for (motor in motors) {
   for (channel in channels) {
-  
+
+    cat("----------start----------\n")  
+
     fluxQuery <- sprintf(
-      'from(bucket: "%s") |> range(start: -3m) |> filter(fn: (r) => r._measurement == "%s") |> filter(fn: (r) => r.channel == "%s") |> filter(fn: (r) => r._field == "%s") |> filter(fn: (r) => r.motor == "%s")', 
-      bucket, measurement, channel, field, motor)
+      'from(bucket: "%s") |> range(start: -1m) |> filter(fn: (r) => r._measurement == "%s") |> filter(fn: (r) => r.channel == "%s") |> filter(fn: (r) => r.gateway == "%s") |> filter(fn: (r) => r._field == "%s") |> filter(fn: (r) => r.motor == "%s")', 
+      bucket, measurement, channel, gateway, field, motor)
   
     data <- client$query(fluxQuery)
     cat("client에 read query 완료.\n")  
     if (!is.null(data)) {
     
-      data_df <- data.frame(solData) ## 들어오는 데이터를 data frame으로 변환.
+      data_df <- data.frame(data) ## 들어오는 데이터를 data frame으로 변환.
+      cat("data value 개수",length(data_df$X_value),"\n")
+
+      data_df$X_value[is.infinite(data_df$X_value)] <- NA
+      data_df$X_value <- interpolate_na(data_df$X_value)
+
+      cat("Inf 값 NA로 변환\n")
+
+      data_df$X_value <- zoo::na.locf(data_df$X_value, na.rm = FALSE, fromLast = FALSE)
+      data_df$X_value <- zoo::na.locf(data_df$X_value, na.rm = FALSE, fromLast = TRUE)
+
+      cat("남아 있을 na값 재검토 및 처리\n")
+
       normalized_vector <- max(data_df$X_value, na.rm = TRUE)
-    
-      normalized_data <- scale(data_df$X_value, center = FALSE, scale= normalized_vector)
-    
+
+      if(normalized_vector != 0){    
+        normalized_data <- scale(data_df$X_value, center = FALSE, scale= normalized_vector)
+      } else {
+        normalized_data <- data_df$X_value
+      }
+
+      cat("표준화 진행 완료\n")
+
       result_df <- data.frame(
         time = data_df$time,
         value = normalized_data,
@@ -78,11 +128,14 @@ for (motor in motors) {
         motor = data_df$motor,
         measurement = data_df$X_measurement
       )
+
+      cat("결과 프레임 생성\n")
     
       output_client$write(result_df, bucket = "ai", precision = "ms", measurementCol = "measurement", tagCols = c("channel", "gateway", "motor"), fieldCols = c("value"), timeCol = "time")
       cat("output_client write query 완료.\n")
       cat("channel is:", channel, "\n")
+
+      cat("----------end-----------\n")
     }
   }
 }
-
