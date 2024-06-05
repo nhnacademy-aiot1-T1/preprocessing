@@ -8,8 +8,8 @@
 
 
 ## 사용 기술
-전처리: R
-사용한 packages: config, influxdbclient
+- 전처리: R
+- 사용한 packages: config, influxdbclient
 
 
 ## 주요 기능
